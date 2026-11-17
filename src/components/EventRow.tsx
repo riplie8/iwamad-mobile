@@ -1,9 +1,9 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet } from 'react-native';
-import { CampusEvent } from '../data/events';
+import type { CampusEvent } from '../data/events';
 
 interface EventRowProps {
-  event: EventItem;
+  event: CampusEvent;
   onPress: () => void;
   onLongPress: () => void;
   isSaved: boolean;
@@ -27,6 +27,11 @@ export default function EventRow({ event, onPress, onLongPress, isSaved }: Event
 }
 
 const styles = StyleSheet.create({
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
   card: {
     padding: 16,
     marginVertical: 8,
