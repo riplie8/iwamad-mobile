@@ -1,14 +1,36 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet } from 'react-native';
+import { ActivityIndicator, Pressable, View, Text, TextInput, FlatList, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
-import { events } from '../../src/data/events';
+import { useEvents } from '../../src/hooks/useEvents';
 import EventRow from '../../src/components/EventRow';
 
 export default function EventsScreen() {
+  const { data, isPending, isError, error, refetch, isRefetching } = useEvents();
   const [searchQuery, setSearchQuery] = useState('');
   const [savedIds, setSavedIds] = useState<number[]>([]);
 
-  const filteredEvents = events.filter((e) =>
+  if (isPending) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator />
+        <Text>Loading events</Text>
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Could not load events</Text>
+        <Text style={styles.errorText}>{error.message}</Text>
+        <Pressable style={styles.retryButton} accessibilityRole="button" onPress={() => refetch()}>
+          <Text>Try again</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  const filteredEvents = data.filter((e) =>
     e.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -34,6 +56,8 @@ export default function EventsScreen() {
       />
 
       <FlatList
+        refreshing={isRefetching}
+        onRefresh={() => refetch()}
         data={filteredEvents}
         keyExtractor={(e) => String(e.id)}
         renderItem={({ item }) => (
@@ -58,6 +82,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff' 
   },
   infoText: { fontSize: 14, marginBottom: 8, color: '#333' },
+  errorText: { color: 'red', marginBottom: 12 },
+  retryButton: { minHeight: 44, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16 },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',

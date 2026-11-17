@@ -1,18 +1,41 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { ActivityIndicator, Pressable, View, Text, StyleSheet } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
-import { events } from '../../src/data/events';
+import { useEvents } from '../../src/hooks/useEvents';
 
 export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const event = events.find((e) => e.id === Number(id));
+  const { data, isPending, isError, error, refetch } = useEvents();
+
+  if (isPending) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator />
+        <Text>Loading events</Text>
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorTitle}>Could not load events</Text>
+        <Text>{error.message}</Text>
+        <Pressable style={styles.retryButton} accessibilityRole="button" onPress={() => refetch()}>
+          <Text>Try again</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  const event = data.find((e) => e.id === Number(id));
 
   if (!event) {
     return (
       <View style={styles.container}>
         <Stack.Screen options={{ title: 'Not Found' }} />
         <Text style={styles.errorTitle}>Event not found</Text>
-        <Text>No event with id {id}.</Text>
+        <Text>No event with id {id}</Text>
       </View>
     );
   }
@@ -31,6 +54,7 @@ export default function EventDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, justifyContent: 'center', alignItems: 'center' },
   errorTitle: { fontSize: 20, fontWeight: 'bold', color: 'red', marginBottom: 8 },
+  retryButton: { minHeight: 44, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16 },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 12 },
   text: { fontSize: 16, marginBottom: 6 },
 });
