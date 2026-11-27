@@ -1,8 +1,9 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, View, Text, StyleSheet } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, View, Text, StyleSheet } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { useEvents } from '../../src/hooks/useEvents';
 import HolidayNote from '../../src/components/HolidayNote';
+import ChatPanel from '../../src/components/ChatPanel';
 
 export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -42,19 +43,24 @@ export default function EventDetailScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.contentContainer}
+      keyboardShouldPersistTaps="handled"
+    >
       <Stack.Screen options={{ title: event.title }} />
       <Text style={styles.title}>{event.title}</Text>
       <Text style={styles.text}>Date: {event.date}</Text>
       <HolidayNote date={event.date} />
       <Text style={styles.text}>Place: {event.place}</Text>
       <Text style={styles.text}>Available Seats: {event.seats}</Text>
-    </View>
+      <ChatPanel eventId={event.id} eventTitle={event.title} />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, justifyContent: 'center', alignItems: 'center' },
+  contentContainer: { flexGrow: 1, padding: 20 },
   errorTitle: { fontSize: 20, fontWeight: 'bold', color: 'red', marginBottom: 8 },
   retryButton: { minHeight: 44, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16 },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 12 },
